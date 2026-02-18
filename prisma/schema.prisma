@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String     @id @default(cuid())
+  name          String?
+  email         String?    @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  businesses    Business[]
+  createdAt     DateTime   @default(now())
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Business {
+  id                String     @id @default(cuid())
+  name              String
+  ownerId           String
+  owner             User       @relation(fields: [ownerId], references: [id])
+  plan              String     @default("free") // free, starter, pro, agency
+  stripeCustomerId  String?
+  stripeSubId       String?
+  locations         Location[]
+  alertPrefs        Json       @default("{\"instant\": true, \"weekly\": true}")
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+}
+
+model Location {
+  id            String    @id @default(cuid())
+  businessId    String
+  business      Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  name          String
+  googlePlaceId String?
+  yelpId        String?
+  yelpUrl       String?
+  reviews       Review[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Review {
+  id           String          @id @default(cuid())
+  locationId   String
+  location     Location        @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  platform     String          // google, yelp, facebook, trustpilot
+  externalId   String          // ID from the platform
+  rating       Int             // 1-5
+  text         String?         @db.Text
+  authorName   String?
+  authorImage  String?
+  reviewDate   DateTime
+  fetchedAt    DateTime        @default(now())
+  isNew        Boolean         @default(true)
+  respondedAt  DateTime?
+  analysis     ReviewAnalysis?
+
+  @@unique([platform, externalId])
+}
+
+model ReviewAnalysis {
+  id             String   @id @default(cuid())
+  reviewId       String   @unique
+  review         Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  sentiment      String   // positive, neutral, negative
+  sentimentScore Float    // -1 to 1
+  themes         String[] // array of theme tags
+  urgency        String   // low, medium, high
+  suggestedReply String?  @db.Text
+  processedAt    DateTime @default(now())
+}
+
+model AlertLog {
+  id         String   @id @default(cuid())
+  businessId String
+  type       String   // instant, weekly_digest, trend_alert
+  payload    Json
+  sentAt     DateTime @default(now())
+}
