@@ -1,7 +1,6 @@
 "use client";
 
 import { AlertTriangle, X } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useState } from "react";
@@ -17,31 +16,35 @@ export function AlertBanner({ count, platforms }: AlertBannerProps) {
   if (dismissed || count === 0) return null;
 
   return (
-    <Alert className="bg-amber-50 border-amber-200 mb-6">
-      <AlertTriangle className="h-4 w-4 text-amber-600" />
-      <AlertDescription className="flex items-center justify-between">
-        <span className="text-amber-800">
-          <strong>{count} new review{count > 1 ? "s" : ""}</strong> need{count === 1 ? "s" : ""} attention
+    <div className="data-card bg-destructive/10 border-destructive/30 rounded-lg p-4 mb-6 flex items-center justify-between gap-4">
+      <div className="flex items-center gap-3">
+        <div className="w-8 h-8 rounded bg-destructive/20 flex items-center justify-center">
+          <AlertTriangle className="w-4 h-4 text-destructive" />
+        </div>
+        <div>
+          <span className="text-foreground font-medium">
+            {count} review{count > 1 ? "s" : ""} need{count === 1 ? "s" : ""} attention
+          </span>
           {platforms.length > 0 && (
-            <span className="ml-1 text-amber-600">
-              ({platforms.join(" · ")})
+            <span className="ml-2 text-sm text-muted-foreground font-mono">
+              [{platforms.join(" • ")}]
             </span>
           )}
-        </span>
-        <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline" className="bg-white" asChild>
-            <Link href="/reviews?filter=urgent">View now →</Link>
-          </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-6 w-6"
-            onClick={() => setDismissed(true)}
-          >
-            <X className="h-4 w-4" />
-          </Button>
         </div>
-      </AlertDescription>
-    </Alert>
+      </div>
+      <div className="flex items-center gap-2">
+        <Button size="sm" className="bg-destructive text-white hover:bg-destructive/90" asChild>
+          <Link href="/reviews?filter=urgent">View now →</Link>
+        </Button>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-6 w-6 hover:bg-destructive/20"
+          onClick={() => setDismissed(true)}
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
   );
 }

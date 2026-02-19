@@ -1,185 +1,321 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, Bell, TrendingUp, MessageSquare, Check, Zap } from "lucide-react";
+import { 
+  AlertTriangle, 
+  TrendingUp, 
+  MessageSquare, 
+  Zap,
+  Star,
+  ArrowRight,
+  Check,
+  Activity
+} from "lucide-react";
+
+// Fake review data for the live monitor demo
+const demoReviews = [
+  { stars: 1, text: "Waited 45 minutes for food...", time: "2m ago", platform: "Google", sentiment: "negative" },
+  { stars: 5, text: "Best tacos in Rotterdam!", time: "8m ago", platform: "Google", sentiment: "positive" },
+  { stars: 2, text: "Staff was rude and dismissive", time: "15m ago", platform: "Yelp", sentiment: "negative" },
+  { stars: 4, text: "Great food, a bit pricey", time: "1h ago", platform: "Google", sentiment: "neutral" },
+  { stars: 5, text: "Amazing experience, will come back", time: "2h ago", platform: "Google", sentiment: "positive" },
+];
+
+function LiveReviewFeed() {
+  return (
+    <div className="bg-card border border-border rounded-lg overflow-hidden">
+      {/* Terminal header */}
+      <div className="flex items-center gap-2 px-4 py-2 bg-secondary border-b border-border">
+        <div className="flex gap-1.5">
+          <div className="w-3 h-3 rounded-full bg-destructive/60" />
+          <div className="w-3 h-3 rounded-full bg-warning/60" />
+          <div className="w-3 h-3 rounded-full bg-primary/60" />
+        </div>
+        <span className="text-xs text-muted-foreground font-mono ml-2">review-monitor.sh</span>
+        <div className="ml-auto flex items-center gap-2">
+          <span className="inline-flex items-center gap-1 text-xs text-primary">
+            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+            LIVE
+          </span>
+        </div>
+      </div>
+      
+      {/* Review feed */}
+      <div className="divide-y divide-border">
+        {demoReviews.map((review, i) => (
+          <div key={i} className="px-4 py-3 hover:bg-secondary/50 transition-colors">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="flex">
+                    {[...Array(5)].map((_, j) => (
+                      <Star 
+                        key={j} 
+                        className={`w-3 h-3 ${j < review.stars ? 'fill-warning text-warning' : 'text-muted'}`} 
+                      />
+                    ))}
+                  </div>
+                  <Badge 
+                    variant={review.sentiment === 'negative' ? 'destructive' : 'secondary'}
+                    className="text-[10px] px-1.5 py-0"
+                  >
+                    {review.platform}
+                  </Badge>
+                  {review.sentiment === 'negative' && (
+                    <AlertTriangle className="w-3 h-3 text-destructive" />
+                  )}
+                </div>
+                <p className="text-sm text-foreground truncate">{review.text}</p>
+              </div>
+              <span className="text-xs text-muted-foreground font-mono whitespace-nowrap">{review.time}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+      
+      {/* Status bar */}
+      <div className="px-4 py-2 bg-secondary border-t border-border flex items-center justify-between text-xs font-mono">
+        <span className="text-muted-foreground">5 reviews • 2 alerts</span>
+        <span className="text-primary">↑ Sync complete</span>
+      </div>
+    </div>
+  );
+}
+
+function StatsCard({ value, label, trend }: { value: string; label: string; trend?: string }) {
+  return (
+    <div className="data-card bg-card rounded-lg p-4">
+      <div className="text-3xl font-bold font-mono text-foreground mb-1">{value}</div>
+      <div className="text-sm text-muted-foreground">{label}</div>
+      {trend && (
+        <div className={`text-xs font-mono mt-2 ${trend.startsWith('+') ? 'text-primary' : 'text-destructive'}`}>
+          {trend}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+    <div className="min-h-screen bg-background bg-grid">
       {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-lg flex items-center justify-center">
-              <Bell className="w-4 h-4 text-white" />
+      <header className="border-b border-border sticky top-0 z-50 bg-background/80 backdrop-blur-sm">
+        <div className="container mx-auto px-4 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded bg-primary/10 border border-primary/20 flex items-center justify-center">
+              <Activity className="w-4 h-4 text-primary" />
             </div>
-            <span className="font-bold text-xl">ReviewPulse</span>
+            <span className="font-semibold tracking-tight">ReviewPulse</span>
           </div>
-          <div className="flex items-center gap-4">
-            <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground">
+          <div className="flex items-center gap-3">
+            <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Sign in
             </Link>
-            <Button asChild>
-              <Link href="/login">Get Started Free</Link>
+            <Button asChild size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
+              <Link href="/login">Start monitoring</Link>
             </Button>
           </div>
         </div>
       </header>
 
       {/* Hero */}
-      <section className="container mx-auto px-4 py-20 text-center">
-        <Badge variant="secondary" className="mb-4">
-          🎉 Now monitoring 10,000+ reviews for SMBs
-        </Badge>
-        <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 max-w-4xl mx-auto">
-          Know about every bad review{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-indigo-600">
-            before your customers do.
-          </span>
-        </h1>
-        <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-          AI monitors Google + Yelp, spots patterns, and alerts you within 15 minutes.
-          Not in 3 days.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-          <Button size="lg" asChild className="text-lg px-8">
-            <Link href="/login">Connect Google Free →</Link>
-          </Button>
-        </div>
-        <p className="text-sm text-muted-foreground">No credit card required. Set up in 2 minutes.</p>
-      </section>
-
-      {/* How it works */}
-      <section className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl font-bold text-center mb-12">How it works</h2>
-        <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-          <Card className="text-center p-6">
-            <CardContent className="pt-6">
-              <div className="w-12 h-12 bg-violet-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-violet-600">1</span>
-              </div>
-              <h3 className="font-semibold mb-2">Connect your Google Business</h3>
-              <p className="text-sm text-muted-foreground">2 clicks. We only read reviews — never post without asking.</p>
-            </CardContent>
-          </Card>
-          <Card className="text-center p-6">
-            <CardContent className="pt-6">
-              <div className="w-12 h-12 bg-violet-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-violet-600">2</span>
-              </div>
-              <h3 className="font-semibold mb-2">AI reads every review</h3>
-              <p className="text-sm text-muted-foreground">Tags sentiment + themes automatically. "Slow service", "great food", etc.</p>
-            </CardContent>
-          </Card>
-          <Card className="text-center p-6">
-            <CardContent className="pt-6">
-              <div className="w-12 h-12 bg-violet-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-violet-600">3</span>
-              </div>
-              <h3 className="font-semibold mb-2">Get alerted instantly</h3>
-              <p className="text-sm text-muted-foreground">1-2 star reviews? Email within 15 minutes. Weekly digest for trends.</p>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      {/* Pricing comparison */}
-      <section className="bg-slate-50 py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-4">Why pay $300/month?</h2>
-          <p className="text-muted-foreground text-center mb-12">
-            Enterprise tools charge enterprise prices. You&apos;re an SMB.
-          </p>
-          <div className="max-w-2xl mx-auto space-y-4">
-            <div className="flex items-center justify-between p-4 bg-white rounded-lg border">
-              <span className="font-medium">Birdeye</span>
-              <span className="text-red-500 font-bold">$300-500/mo 😬</span>
+      <section className="container mx-auto px-4 py-16 md:py-24">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <Badge variant="outline" className="mb-4 text-primary border-primary/30">
+              <span className="w-2 h-2 rounded-full bg-primary animate-pulse mr-2" />
+              Real-time monitoring
+            </Badge>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
+              Catch bad reviews<br />
+              <span className="text-primary glow-text">in 15 minutes,</span><br />
+              not 3 days.
+            </h1>
+            <p className="text-lg text-muted-foreground mb-8 max-w-lg">
+              AI monitors Google + Yelp around the clock. 
+              Get instant alerts, spot trends, respond faster than your competitors.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 glow">
+                <Link href="/login">
+                  Connect Google Business
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <Link href="#pricing">View pricing</Link>
+              </Button>
             </div>
-            <div className="flex items-center justify-between p-4 bg-white rounded-lg border">
-              <span className="font-medium">Podium</span>
-              <span className="text-red-500 font-bold">$249/mo 😬</span>
-            </div>
-            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-violet-600 to-indigo-600 rounded-lg text-white">
-              <span className="font-bold">ReviewPulse</span>
-              <span className="font-bold">$29/mo ✓</span>
-            </div>
+            <p className="text-sm text-muted-foreground mt-4">
+              Free plan available. No credit card required.
+            </p>
+          </div>
+          
+          {/* Live demo */}
+          <div className="relative">
+            <LiveReviewFeed />
+            <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-primary/5 blur-3xl rounded-full" />
           </div>
         </div>
       </section>
 
-      {/* Features */}
+      {/* Stats bar */}
+      <section className="border-y border-border bg-card/50">
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
+            <StatsCard value="10K+" label="Reviews monitored" trend="+2.4K this week" />
+            <StatsCard value="<15min" label="Avg alert time" />
+            <StatsCard value="500+" label="SMBs trust us" trend="+12% MoM" />
+            <StatsCard value="$270" label="Saved vs enterprise" />
+          </div>
+        </div>
+      </section>
+
+      {/* How it works */}
       <section className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl font-bold text-center mb-12">Everything you need</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div className="text-center mb-12">
+          <h2 className="text-2xl md:text-3xl font-bold mb-3">How it works</h2>
+          <p className="text-muted-foreground">Three steps. Two minutes. Zero complexity.</p>
+        </div>
+        
+        <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
           {[
-            { icon: Bell, title: "Instant Alerts", desc: "Email within 15 min for negative reviews" },
-            { icon: TrendingUp, title: "Trend Detection", desc: '"Slow service up 60% this week"' },
-            { icon: MessageSquare, title: "AI Response Drafts", desc: "One-click copy, personalized replies" },
-            { icon: Star, title: "Multi-Platform", desc: "Google + Yelp in one dashboard" },
-            { icon: Zap, title: "Weekly Digest", desc: "Top themes, rating trends, insights" },
-            { icon: Check, title: "Response Tracking", desc: "Mark handled, never lose track" },
-          ].map((feature) => (
-            <Card key={feature.title} className="p-6">
-              <CardContent className="pt-0">
-                <feature.icon className="w-8 h-8 text-violet-600 mb-3" />
-                <h3 className="font-semibold mb-1">{feature.title}</h3>
-                <p className="text-sm text-muted-foreground">{feature.desc}</p>
-              </CardContent>
+            {
+              step: "01",
+              title: "Connect",
+              desc: "Link your Google Business. We only read reviews — never post without asking.",
+              icon: Zap
+            },
+            {
+              step: "02", 
+              title: "Monitor",
+              desc: "AI scans 24/7. Tags sentiment, spots patterns, builds your reputation profile.",
+              icon: Activity
+            },
+            {
+              step: "03",
+              title: "Respond",
+              desc: "Get alerts for bad reviews in 15 min. AI drafts responses. You stay in control.",
+              icon: MessageSquare
+            }
+          ].map((item, i) => (
+            <Card key={i} className="data-card bg-card p-6 relative overflow-hidden">
+              <span className="absolute top-4 right-4 text-6xl font-bold text-border">{item.step}</span>
+              <div className="relative">
+                <div className="w-10 h-10 rounded bg-primary/10 border border-primary/20 flex items-center justify-center mb-4">
+                  <item.icon className="w-5 h-5 text-primary" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2">{item.title}</h3>
+                <p className="text-sm text-muted-foreground">{item.desc}</p>
+              </div>
             </Card>
           ))}
         </div>
       </section>
 
       {/* Pricing */}
-      <section className="bg-slate-50 py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Simple pricing</h2>
-          <div className="grid md:grid-cols-4 gap-6 max-w-5xl mx-auto">
-            {[
-              { name: "Free", price: "$0", features: ["1 location", "Google only", "Email alerts", "30-day history"] },
-              { name: "Starter", price: "$29", popular: true, features: ["1 location", "Google + Yelp", "Full history", "Weekly digest"] },
-              { name: "Pro", price: "$59", features: ["3 locations", "All platforms", "Trend alerts", "Slack webhook"] },
-              { name: "Agency", price: "$149", features: ["10 locations", "White-label", "API access", "Priority support"] },
-            ].map((plan) => (
-              <Card key={plan.name} className={`p-6 ${plan.popular ? "border-violet-600 border-2" : ""}`}>
-                {plan.popular && (
-                  <Badge className="mb-2 bg-violet-600">Most Popular</Badge>
-                )}
-                <CardContent className="pt-0">
-                  <h3 className="font-semibold text-lg">{plan.name}</h3>
-                  <p className="text-3xl font-bold my-2">{plan.price}<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
-                  <ul className="space-y-2 text-sm">
-                    {plan.features.map((f) => (
-                      <li key={f} className="flex items-center gap-2">
-                        <Check className="w-4 h-4 text-green-500" />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                  <Button className="w-full mt-4" variant={plan.popular ? "default" : "outline"} asChild>
-                    <Link href="/login">Get Started</Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+      <section id="pricing" className="container mx-auto px-4 py-16">
+        <div className="text-center mb-12">
+          <Badge variant="outline" className="mb-4">
+            Save $270+/mo vs enterprise tools
+          </Badge>
+          <h2 className="text-2xl md:text-3xl font-bold mb-3">Simple pricing</h2>
+          <p className="text-muted-foreground">No enterprise sales calls. No hidden fees.</p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          {[
+            {
+              name: "Free",
+              price: "$0",
+              period: "forever",
+              features: ["1 location", "Google only", "Email alerts", "30-day history"],
+              cta: "Start free",
+              highlight: false
+            },
+            {
+              name: "Pro",
+              price: "$29",
+              period: "/month",
+              features: ["1 location", "Google + Yelp", "AI response drafts", "Unlimited history", "Trend reports"],
+              cta: "Start trial",
+              highlight: true
+            },
+            {
+              name: "Agency",
+              price: "$149",
+              period: "/month", 
+              features: ["10 locations", "All platforms", "White-label", "API access", "Priority support"],
+              cta: "Contact us",
+              highlight: false
+            }
+          ].map((plan, i) => (
+            <Card 
+              key={i} 
+              className={`data-card bg-card p-6 relative ${plan.highlight ? 'border-primary glow' : ''}`}
+            >
+              {plan.highlight && (
+                <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground">
+                  Most popular
+                </Badge>
+              )}
+              <div className="mb-6">
+                <h3 className="font-semibold text-lg mb-2">{plan.name}</h3>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-4xl font-bold font-mono">{plan.price}</span>
+                  <span className="text-muted-foreground">{plan.period}</span>
+                </div>
+              </div>
+              <ul className="space-y-3 mb-6">
+                {plan.features.map((feature, j) => (
+                  <li key={j} className="flex items-center gap-2 text-sm">
+                    <Check className="w-4 h-4 text-primary" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+              <Button 
+                asChild 
+                className={`w-full ${plan.highlight ? 'bg-primary text-primary-foreground hover:bg-primary/90' : ''}`}
+                variant={plan.highlight ? 'default' : 'outline'}
+              >
+                <Link href="/login">{plan.cta}</Link>
+              </Button>
+            </Card>
+          ))}
         </div>
       </section>
 
       {/* CTA */}
-      <section className="container mx-auto px-4 py-20 text-center">
-        <h2 className="text-3xl font-bold mb-4">Stop letting bad reviews go viral.</h2>
-        <p className="text-muted-foreground mb-8">Join 500+ SMBs who catch problems before they spread.</p>
-        <Button size="lg" asChild>
-          <Link href="/login">Start Free Trial →</Link>
-        </Button>
+      <section className="border-t border-border">
+        <div className="container mx-auto px-4 py-16 text-center">
+          <h2 className="text-2xl md:text-3xl font-bold mb-3">
+            Stop letting bad reviews go viral.
+          </h2>
+          <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
+            Join 500+ SMBs who catch problems before they spread.
+          </p>
+          <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 glow">
+            <Link href="/login">
+              Start monitoring free
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Link>
+          </Button>
+        </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          © 2026 ReviewPulse. All rights reserved.
+      <footer className="border-t border-border py-8">
+        <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Activity className="w-4 h-4 text-primary" />
+            <span>ReviewPulse</span>
+          </div>
+          <div className="text-sm text-muted-foreground">
+            © 2026 ReviewPulse. Built for SMBs who don't have time for enterprise BS.
+          </div>
         </div>
       </footer>
     </div>

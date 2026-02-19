@@ -5,7 +5,7 @@ import { ReviewCard } from "@/components/review-card";
 import { ThemeBar } from "@/components/theme-bar";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, TrendingUp, TrendingDown, Star, AlertTriangle } from "lucide-react";
 
 // Mock data - in production, this comes from the database
 const mockReviews = [
@@ -69,6 +69,38 @@ const mockThemes = [
   { name: "ambiance", count: 12, trend: 0, avgRating: 4.7, urgency: "positive" as const },
 ];
 
+function StatCard({ 
+  label, 
+  value, 
+  subtext, 
+  trend,
+  icon: Icon 
+}: { 
+  label: string; 
+  value: string; 
+  subtext?: string;
+  trend?: "up" | "down" | null;
+  icon?: typeof Star;
+}) {
+  return (
+    <div className="data-card bg-card rounded-lg p-4">
+      <div className="flex items-start justify-between">
+        <span className="text-sm text-muted-foreground">{label}</span>
+        {Icon && <Icon className="w-4 h-4 text-muted-foreground" />}
+      </div>
+      <div className="flex items-baseline gap-2 mt-1">
+        <span className="text-2xl font-bold font-mono text-foreground">{value}</span>
+        {trend && (
+          <span className={trend === "up" ? "text-primary" : "text-destructive"}>
+            {trend === "up" ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+          </span>
+        )}
+      </div>
+      {subtext && <span className="text-xs text-muted-foreground font-mono">{subtext}</span>}
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const urgentCount = mockReviews.filter((r) => r.rating <= 2 && r.isNew).length;
   const urgentPlatforms = [...new Set(mockReviews.filter((r) => r.rating <= 2 && r.isNew).map((r) => r.platform))];
@@ -77,15 +109,23 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <AlertBanner count={urgentCount} platforms={urgentPlatforms} />
 
+      {/* Stats row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard label="Avg Rating" value="4.2" subtext="↑ 0.3 this week" trend="up" icon={Star} />
+        <StatCard label="Reviews (30d)" value="47" subtext="+12 from last month" trend="up" />
+        <StatCard label="Response Rate" value="89%" subtext="2 pending" />
+        <StatCard label="Alerts" value="2" subtext="need attention" icon={AlertTriangle} />
+      </div>
+
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <RatingChart data={mockChartData} />
         </div>
 
-        <Card>
+        <Card className="bg-card border-border">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-lg">Top Issues This Week</CardTitle>
-            <Button variant="ghost" size="sm" asChild>
+            <CardTitle className="text-lg text-foreground">Top Issues</CardTitle>
+            <Button variant="ghost" size="sm" asChild className="hover:bg-secondary">
               <Link href="/themes">
                 View all <ArrowRight className="w-4 h-4 ml-1" />
               </Link>
@@ -99,10 +139,16 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <Card>
+      <Card className="bg-card border-border">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-lg">Recent Reviews</CardTitle>
-          <Button variant="ghost" size="sm" asChild>
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-lg text-foreground">Recent Reviews</CardTitle>
+            <span className="text-xs text-muted-foreground font-mono">
+              <span className="w-2 h-2 rounded-full bg-primary animate-pulse inline-block mr-1" />
+              Live
+            </span>
+          </div>
+          <Button variant="ghost" size="sm" asChild className="hover:bg-secondary">
             <Link href="/reviews">
               View all <ArrowRight className="w-4 h-4 ml-1" />
             </Link>

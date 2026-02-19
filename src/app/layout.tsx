@@ -1,13 +1,21 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 
-const inter = Inter({ subsets: ["latin"] });
+const spaceGrotesk = Space_Grotesk({ 
+  subsets: ["latin"],
+  variable: "--font-geist-sans"
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-geist-mono"
+});
 
 export const metadata: Metadata = {
-  title: "ReviewPulse — AI Review Monitoring for SMBs",
-  description: "Know about every bad review before your customers do. AI monitors Google + Yelp, spots patterns, and alerts you within 15 minutes.",
+  title: "ReviewPulse — Real-time Review Monitoring for SMBs",
+  description: "Catch bad reviews in 15 minutes, not 3 days. AI monitors Google + Yelp, spots patterns, and alerts you instantly.",
 };
 
 export default function RootLayout({
@@ -16,8 +24,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
+    <html lang="en" className="dark">
+      <body className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
         {children}
         <Toaster />
       </body>
