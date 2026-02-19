@@ -7,7 +7,8 @@ WORKDIR /app
 
 # Copy package files
 COPY package.json package-lock.json* ./
-RUN npm ci
+# Ensure devDependencies are installed regardless of NODE_ENV
+RUN npm ci --include=dev
 
 # Rebuild the source code only when needed
 FROM base AS builder
